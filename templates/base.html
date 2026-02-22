@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>CNC Queue Management</title>
+        <style>
+        body { font-family: sans-serif; margin: 40px; }
+        nav { margin-bottom: 20px; padding: 10px; background: #eee; }
+        </style>
+    </head>
+    <body>
+        <nav>
+            <strong>CNC Shop Queue</strong> |
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+        </nav>
+        {% block content %}
+        {% endblock content %}
+    </body>
+</html>

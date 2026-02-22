@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="order-header">
+        <h2>Order #{{ order.id }} - {{ order.customer_name }}</h2>
+        <span class="badge"
+              style="padding: 5px 10px;
+                     background: #f0ad4e;
+                     color: white">{{ order.status }}</span>
+    </div>
+    <hr>
+    <div class="specs-grid" style="display: flex; gap: 40px;">
+        <div style="flex: 2;">
+            <h3>CNC Items to Cut</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #333; color: white;">
+                    <tr>
+                        <th style="padding: 10px;">Item Name</th>
+                        <th>Dimensions</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 10px;">{{ item.item_name }}</td>
+                            <td>{{ item.size }}</td>
+                            <td>x {{ item.quantity }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3">No items found for this order.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div style="flex: 1;
+                    background: #f9f9f9;
+                    padding: 20px;
+                    border: 1px dashed #ccc">
+            <h3>Design Reference</h3>
+            {% if order.logo_reference %}
+                <img src="{{ order.logo_reference.url }}"
+                     style="max-width: 100%;
+                            border-radius: 5px">
+                <p>
+                    <a href="{{ order.logo_reference.url }}" download>Download Original File</a>
+                </p>
+            {% else %}
+                <p style="color: #888;">No logo uploaded for this job.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div style="margin-top: 30px;">
+        <h4>Financials</h4>
+        <p>Total Price: ${{ order.total_price }}</p>
+        <p>Deposit Paid: ${{ order.paid_balance }}</p>
+        <p>
+            <strong>Remaining: ${{ order.remaining_balance }}</strong>
+        </p>
+    </div>
+{% endblock content %}
