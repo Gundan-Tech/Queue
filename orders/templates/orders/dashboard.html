@@ -1,18 +1,168 @@
 {% extends 'base.html' %}
 {% block content %}
+    <h2 style="margin-bottom: 20px;">CNC Job Queue</h2>
+    <div style="display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px">
+        <div style="display: flex; gap: 10px;">
+            <a href="?status="
+               style="text-decoration:none;
+                      padding: 8px 15px;
+                      border-radius: 5px;
+                      background: #eee;
+                      color: #333">All</a>
+            <a href="?status=Pending"
+               style="text-decoration:none;
+                      padding: 8px 15px;
+                      border-radius: 5px;
+                      background: #fff3cd;
+                      color: #856404">Pending</a>
+            <a href="?status=In Progress"
+               style="text-decoration:none;
+                      padding: 8px 15px;
+                      border-radius: 5px;
+                      background: #d1ecf1;
+                      color: #0c5460">Active</a>
+            <a href="?status=Completed"
+               style="text-decoration:none;
+                      padding: 8px 15px;
+                      border-radius: 5px;
+                      background: #d4edda;
+                      color: #155724">Done</a>
+        </div>
+        <a href="/admin/orders/order/add/"
+           style="background: #28a745;
+                  color: white;
+                  padding: 10px 20px;
+                  border-radius: 5px;
+                  text-decoration: none;
+                  font-weight: bold;
+                  box-shadow: 0 2px 4px rgba(0,0,0,0.1)">+ New CNC Order</a>
+    </div>
+    <table style="width:100%;
+                  border-collapse: collapse;
+                  background: white;
+                  border: 1px solid #ddd;
+                  box-shadow: 0 2px 5px rgba(0,0,0,0.1)">
+        <thead>
+            <tr style="background-color: #333; color: white; text-align: left;">
+                <th style="padding: 15px;">Customer & Contact</th>
+                <th style="padding: 15px;">Status</th>
+                <th style="padding: 15px;">Actions</th>
+                <th style="padding: 15px;">Management</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 15px;">
+                        <strong style="font-size: 1.1em; color: #333;">{{ order.customer_name }}</strong>
+                        <br>
+                        <small style="color: #666;">{{ order.customer_phone|default:"No phone provided" }}</small>
+                    </td>
+                    <td style="padding: 15px;">
+                        <span style="padding: 5px 10px;
+                                     border-radius: 20px;
+                                     font-size: 0.85em;
+                                     background: {% if order.status == 'Pending' %}#fff3cd;
+                                     color: #856404;
+                                     {% elif order.status == 'In Progress' %}#d1ecf1;
+                                     color: #0c5460;
+                                     {% else %}#d4edda;
+                                     color: #155724;
+                                     {% endif %}">● {{ order.status }}</span>
+                    </td>
+                    <td style="padding: 15px;">
+                        {% if order.status != 'Completed' %}
+                            <form action="{% url 'update-status' order.id %}"
+                                  method="POST"
+                                  style="display:inline">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        style="background: #444;
+                                               color: white;
+                                               border: none;
+                                               padding: 7px 12px;
+                                               cursor: pointer;
+                                               border-radius: 4px;
+                                               font-size: 0.9em">
+                                    {% if order.status == 'Pending' %}
+                                        Start Cutting
+                                    {% else %}
+                                        Mark Complete
+                                    {% endif %}
+                                </button>
+                            </form>
+                        {% else %}
+                            <span style="color: #28a745; font-weight: bold;">✅ Ready for Pickup</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 15px;">
+                        <a href="{% url 'order-detail' order.id %}"
+                           style="margin-right: 15px;
+                                  color: #007bff;
+                                  text-decoration: none">View Specs</a>
+                        <a href="/admin/orders/order/{{ order.id }}/change/"
+                           style="color: #6c757d;
+                                  text-decoration: none;
+                                  border-left: 1px solid #ccc;
+                                  padding-left: 15px">Edit 📝</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" style="padding: 20px; text-align: center; color: #999;">The queue is currently empty.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock content %}
+{% comment %} {% extends 'base.html' %}
+{% block content %}
     <h2>CNC Job Queue</h2>
     <table border="1" style="width:100%; border-collapse: collapse;">
         <thead>
             <tr style="background-color: #f2f2f2;">
                 <th>Order ID</th>
-                <th>Customer</th>
+                <th>Customer & Contact</th>
                 <th>Status</th>
                 <th>Actions</th>
+                <th>Management</th>
             </tr>
         </thead>
         <tbody>
             {% for order in orders %}
                 <tr>
+                    <td>#{{ order.id }}</td>
+                    <td>
+                        <strong>{{ order.customer_name }}</strong>
+                        <br>
+                        <small>{{ order.customer_email }}</small>
+                    </td>
+                    <td>{{ order.status }}</td>
+                    <td></td>
+                    <td>
+                        <a href="/admin/orders/order/{{ order.id }}/change/" style="color: #007bff; text-decoration: none; font-weight: bold">Edit Details 📝</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {% if order.status != 'Completed' %}
+                            <form action="{% url 'update-status' order.id %}" method="POST" style="display:inline">
+                                {% csrf_token %}
+                                <button type="submit" style="background: {% if order.status == 'Pending' %}#28a745{% else %}#007bff{% endif %}; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px">
+                                    {% if order.status == 'Pending' %}
+                                        Start Cutting
+                                    {% else %}
+                                        Mark Complete
+                                    {% endif %}
+                                </button>
+                            </form>
+                        {% else %}
+                            <span style="color: #6c757d;">✅ Done</span>
+                        {% endif %}
+                    </td>
                     <td>{{ order.id }}</td>
                     <td>{{ order.customer_name }}</td>
                     <td>{{ order.status }}</td>
@@ -27,4 +177,4 @@
             {% endfor %}
         </tbody>
     </table>
-{% endblock content %}
+{% endblock content %} {% endcomment %}

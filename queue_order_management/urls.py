@@ -19,11 +19,14 @@ from django.urls import path
 from orders.views import DashboardView, OrderDetailView
 from django.conf import settings
 from django.conf.urls.static import static
+from orders.views import update_status
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
     path('order/<int:pk>/', OrderDetailView.as_view(), name='order-detail'),
+    path('order/<int:pk>/update/', update_status, name='update-status'),
+
 ]
 
 
